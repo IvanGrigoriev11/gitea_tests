@@ -81,6 +81,8 @@ class TestGitea:
         input_confirm_password.send_keys(user_email)
 
         self.driver.find_element(By.XPATH, "//button[contains(text(), 'Install Gitea')]").click()
+
+        # TODO: investigate 'page is not working'
         time.sleep(5)
         self.driver.refresh()
         time.sleep(5)
