@@ -23,4 +23,4 @@ This repository contains test scenario for Gitea service. The scenario relies th
 
 1. Ensure docker desktop is running.
 1. `cd <repo_root>`
-1. `pytest test_gitea/`
+1. `pytest .`
