@@ -8,12 +8,11 @@ from docker.models.containers import Container
 from _pytest.fixtures import SubRequest
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 
 
 IMAGE_NAME = 'gitea/gitea:1.15.2'
 PORT = 3000
-URL = "http://localhost:{}/".format(PORT)
+URL = f"http://localhost:{PORT}/"
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +27,7 @@ def docker_container() -> Container:
     container: Container = client.containers.run(
         IMAGE_NAME,
         name='test-gitea',
-        ports={'3000/tcp': PORT},
+        ports={f'{PORT}/tcp': PORT},
         detach=True)
 
     while True:
@@ -56,6 +55,11 @@ def driver_init(request: SubRequest, docker_container: Container) -> None:
 
 @pytest.mark.usefixtures("driver_init")
 class TestGitea:
+    """
+    Executing the entire test scenario. Tests inside are assumed
+    to be executed in order, thus their order is important.
+    """
+
     driver: webdriver.Chrome
     user_name = 'foo'
     user_password = 'bar'
@@ -112,11 +116,9 @@ class TestGitea:
         repo_name = self.driver.find_element(By.NAME, "repo_name")
         repo_name.send_keys(self.repo_name)
 
-        init_repo = "/html/body/div/div[2]/div/div/form/div/div[7]/div[6]"
-
         self.driver.find_element(By.XPATH, "//div[@id='auto-init']").click()
 
-        self.driver.find_element(By.CLASS_NAME, 'ui.green.button').click()
+        self.driver.find_element(By.XPATH, "//button[contains(text(), 'Create Repository')]").click()
 
         assert self.driver.current_url == f"{URL}{self.user_name}/{self.repo_name}"
 
@@ -128,14 +130,14 @@ class TestGitea:
             By.XPATH,
             "//textarea[@class='inputarea monaco-mouse-cursor-text']"
         ).send_keys(self.file_content)
-        self.driver.find_element(By.CSS_SELECTOR, 'button.ui.green.button').click()
+        self.driver.find_element(By.XPATH, "//button[contains(text(), 'Commit Changes')]").click()
 
         assert self.driver.current_url == self.url_commit_file
 
     def test_verify_file_contents(self) -> None:
         self.driver.get(URL)
 
-        self.driver.find_element(By.XPATH, "//a[@class='repo-list-link df ac sb']").click()
+        self.driver.find_element(By.XPATH, f"//strong[contains(text(), '{self.user_name}/{self.repo_name}')]").click()
         self.driver.find_element(By.XPATH, f"//a[@title='{self.file_name}']").click()
 
-        assert self.driver.find_element(By.XPATH, "//code[@class='code-inner']").text == self.file_content
+        assert self.driver.find_element(By.XPATH, f"//code[contains(text(), '{self.file_content}')]")

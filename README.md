@@ -3,8 +3,7 @@ This repository contains test scenario for Gitea service. The scenario relies th
 
 ## Setting up
 
-**NOTE**: The instruction below is shown for MacOS.
-1. Install python 3.10. 
+1. Install python 3.10 (instructions below for Mac OS). 
    1. Install Homebrew [Official page - Homebrew](https://brew.sh/).
       1. `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
    1. Install `pyenv`. [PyEnv - Documentation on GitHub](https://github.com/pyenv/pyenv).
@@ -16,11 +15,6 @@ This repository contains test scenario for Gitea service. The scenario relies th
       1. `brew install pyenv-virtualenv`.
    1. Create a new virtual environment.
       1. `pyenv virtualenv 3.10.0 gitea`.
-1. Restart your Shell.
-1. To make this interpreter default for the project
-   1. `cd <repo root>`
-   1. run `pyenv local gitea`
-1. Ensure python 3.10 is active by `python --version`
 1. Install the requirements: `pip install -r requirements.txt`.
 1. Install Docker from the [Docker official page](https://www.docker.com/).
 
