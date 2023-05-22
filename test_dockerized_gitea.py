@@ -78,17 +78,13 @@ class TestGitea:
             assert len(soup.select(s)) >= 1
 
     def test_register_new_user(self):
-
-        text = " Administrator Account Settings "
         self.driver.get(URL)
-        # aaa = self.driver.find_element(By.XPATH, f"//*[text()='{text}']")
 
-        admin_section_name = "/html/body/div/div/div/div/div/form/details[3]"
-        login_section = self.driver.find_element(By.XPATH, admin_section_name)
-        ActionChains(self.driver).move_to_element(login_section).click(login_section).perform()
+        login_section = self.driver.find_element(By.XPATH, "//*[contains(text(), 'Administrator Account Settings')]")
+        login_section.click()
 
         input_username = self.driver.find_element(By.NAME, "admin_name")
-        ActionChains(self.driver).move_to_element(input_username).click(input_username).perform()
+        input_username.click()
         input_username.send_keys(self.user_name)
 
         input_email = self.driver.find_element(By.NAME, "admin_passwd")
@@ -109,28 +105,29 @@ class TestGitea:
         time.sleep(5)
         self.driver.refresh()
 
-        assert self.driver.find_element(By.CLASS_NAME, "truncated-item-name").text == self.user_name
+        assert self.driver.find_element(By.XPATH, "//span[@class='truncated-item-name']").text == self.user_name
 
     def test_create_new_repo(self):
-        new_repo_button = "/html/body/div/div[2]/div[3]/div/div[2]/div/div[2]/h4/a"
-
-        self.driver.find_element(By.XPATH, f"{new_repo_button}").click()
+        self.driver.find_element(By.XPATH, "//a[@class='poping up']").click()
         repo_name = self.driver.find_element(By.NAME, "repo_name")
         repo_name.send_keys(self.repo_name)
+
         init_repo = "/html/body/div/div[2]/div/div/form/div/div[7]/div[6]"
-        self.driver.find_element(By.XPATH, init_repo).click()
+
+        self.driver.find_element(By.XPATH, "//div[@id='auto-init']").click()
+
         self.driver.find_element(By.CLASS_NAME, 'ui.green.button').click()
 
-        assert self.driver.current_url == "http://localhost:3000/foo/{}".format(self.repo_name)
+        assert self.driver.current_url == f"{URL}{self.user_name}/{self.repo_name}"
 
     def test_commit_file(self):
-        new_file = "/html/body/div/div[2]/div[2]/div[5]/div[3]/div/a[1]"
-        self.driver.find_element(By.XPATH, new_file).click()
+        self.driver.find_element(By.XPATH, "//a[@class='ui button']").click()
 
-        input_file_name = "/html/body/div[1]/div[2]/div[2]/form/div[1]/div/div/input[1]"
-        self.driver.find_element(By.XPATH, input_file_name).send_keys(self.file_name)
-        input_file_text = "/html/body/div[1]/div[2]/div[2]/form/div[2]/div[2]/div/div/div[1]/textarea"
-        self.driver.find_element(By.XPATH, input_file_text).send_keys(self.file_content)
+        self.driver.find_element(By.ID, "file-name").send_keys(self.file_name)
+        self.driver.find_element(
+            By.XPATH,
+            "//textarea[@class='inputarea monaco-mouse-cursor-text']"
+        ).send_keys(self.file_content)
         self.driver.find_element(By.CSS_SELECTOR, 'button.ui.green.button').click()
 
         assert self.driver.current_url == self.url_commit_file
@@ -138,11 +135,7 @@ class TestGitea:
     def test_verify_file_contents(self) -> None:
         self.driver.get(URL)
 
-        my_repo = "/html/body/div/div[2]/div[3]/div/div[2]/div/div[2]/div[2]/ul/li/a"
-        self.driver.find_element(By.XPATH, my_repo).click()
+        self.driver.find_element(By.XPATH, "//a[@class='repo-list-link df ac sb']").click()
+        self.driver.find_element(By.XPATH, f"//a[@title='{self.file_name}']").click()
 
-        file_name = "/html/body/div/div[2]/div[2]/table/tbody/tr[2]/td[1]/span/a"
-        self.driver.find_element(By.XPATH, file_name).click()
-
-        file_text = "/html/body/div/div[2]/div[2]/div[6]/div/div/table/tbody/tr/td[2]/code"
-        assert self.driver.find_element(By.XPATH, file_text).text == self.file_content
+        assert self.driver.find_element(By.XPATH, "//code[@class='code-inner']").text == self.file_content
